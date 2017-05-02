@@ -325,11 +325,11 @@ abstract class AbstractFilter implements FilterInterface
         switch ($this->searchType) {
             case 'like':
                 $andExpr->add($qb->expr()->like($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, '%'.$searchValue.'%');
+                $qb->setParameter($parameterCounter, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'notLike':
                 $andExpr->add($qb->expr()->notLike($searchField, '?'.$parameterCounter));
-                $qb->setParameter($parameterCounter, '%'.$searchValue.'%');
+                $qb->setParameter($parameterCounter, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'eq':
                 $andExpr->add($qb->expr()->eq($searchField, '?'.$parameterCounter));

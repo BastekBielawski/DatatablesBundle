@@ -801,8 +801,8 @@ class DatatableQueryBuilder
     {
         switch ($searchType) {
             case 'like':
-                $orExpr->add($qb->expr()->like($searchField, '?'.$key));
-                $qb->setParameter($key, '%'.$searchValue.'%');
+                $orExpr->add('LOWER(CAST('.$searchField.' AS text)) LIKE ?'.$key);
+                $qb->setParameter($key, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'notLike':
                 $orExpr->add($qb->expr()->notLike($searchField, '?'.$key));
