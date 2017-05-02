@@ -46,6 +46,13 @@ abstract class AbstractFilter implements FilterInterface
     protected $searchColumn;
 
     /**
+     * Default: null
+     *
+     * @var null|string
+     */
+    protected $searchDql;
+
+    /**
      * Define an initial search (same as DataTables 'searchCols' option).
      * Default: null
      *
@@ -113,6 +120,7 @@ abstract class AbstractFilter implements FilterInterface
         $resolver->setDefaults(array(
             'search_type' => 'like',
             'search_column' => null,
+            'search_dql' => null,
             'initial_search' => null,
             'classes' => null,
             'cancel_button' => false,
@@ -122,6 +130,7 @@ abstract class AbstractFilter implements FilterInterface
 
         $resolver->setAllowedTypes('search_type', 'string');
         $resolver->setAllowedTypes('search_column', array('null', 'string'));
+        $resolver->setAllowedTypes('search_dql', array('null', 'string'));
         $resolver->setAllowedTypes('initial_search', array('null', 'string'));
         $resolver->setAllowedTypes('classes', array('null', 'string'));
         $resolver->setAllowedTypes('cancel_button', 'bool');
@@ -182,6 +191,32 @@ abstract class AbstractFilter implements FilterInterface
     {
         $this->searchColumn = $searchColumn;
 
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getSearchDql()
+    {
+        return $this->searchDql;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSearchDql()
+    {
+        return null !== $this->searchDql;
+    }
+
+    /**
+     * @param null|string $searchDql
+     * @return AbstractFilter
+     */
+    public function setSearchDql(string $searchDql = null)
+    {
+        $this->searchDql = $searchDql;
         return $this;
     }
 
@@ -324,11 +359,11 @@ abstract class AbstractFilter implements FilterInterface
     {
         switch ($this->searchType) {
             case 'like':
-                $andExpr->add($qb->expr()->like($searchField, '?'.$parameterCounter));
+                $andExpr->add('LOWER(CAST('.$searchField.' AS text)) LIKE ?'.$parameterCounter);
                 $qb->setParameter($parameterCounter, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'notLike':
-                $andExpr->add($qb->expr()->notLike($searchField, '?'.$parameterCounter));
+                $andExpr->add('LOWER(CAST('.$searchField.' AS text)) NOT LIKE ?'.$parameterCounter);
                 $qb->setParameter($parameterCounter, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'eq':

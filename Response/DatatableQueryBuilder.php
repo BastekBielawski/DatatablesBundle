@@ -447,7 +447,10 @@ class DatatableQueryBuilder
                     if ('' != $searchValue && 'null' != $searchValue) {
                         /** @var FilterInterface $filter */
                         $filter = $this->accessor->getValue($column, 'filter');
-                        $searchField = $this->searchColumns[$key];
+                        $searchField = $this->accessor->getValue($filter, 'search_dql');
+                        if (null === $searchField) {
+                            $searchField = $this->searchColumns[$key];
+                        }
                         $andExpr = $filter->addAndExpression($andExpr, $qb, $searchField, $searchValue, $parameterCounter);
                     }
                 }
@@ -805,7 +808,7 @@ class DatatableQueryBuilder
                 $qb->setParameter($key, '%'.mb_strtolower($searchValue).'%');
                 break;
             case 'notLike':
-                $orExpr->add($qb->expr()->notLike($searchField, '?'.$key));
+                $orExpr->add('LOWER(CAST('.$searchField.' AS text)) NOT LIKE ?'.$key);
                 $qb->setParameter($key, '%'.$searchValue.'%');
                 break;
             case 'eq':
